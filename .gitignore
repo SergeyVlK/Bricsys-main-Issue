@@ -1,4 +1,4 @@
 Lib/*
 Scripts/*
-params.py
+config.py
 pyvenv.cfg

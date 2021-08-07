@@ -2,3 +2,4 @@ Lib/*
 Scripts/*
 config.py
 pyvenv.cfg
+__pycache__/*

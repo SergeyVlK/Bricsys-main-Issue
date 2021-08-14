@@ -1,0 +1,54 @@
+// root:
+>CREATE DATABASE testresult_bricsys;
+
+>USE testresult_bricsys;
+
+>CREATE TABLE testnames( id INT PRIMARY KEY, name VARCHAR(10));
+
+>CREATE TABLE testresults(testid INT NOT NULL DEFAULT 0, buildid INT NOT NULL, target V
+ARCHAR(20), name VARCHAR(20), status VARCHAR(15), duration FLOAT(8,4), physmemory INT, virtme
+mory INT, create_time DATETIME, testnode VARCHAR(20), PRIMARY KEY (testid,buildid), CONSTRAIN
+T fk_testresults_testnames FOREIGN KEY(testid) REFERENCES testnames(id) ON UPDATE CASCADE ON
+DELETE SET DEFAULT);
+
+>GRANT SELECT, INSERT, UPDATE, DELETE, ALTER ON testresult_bricsys.* TO test_user@192.168.1.36;
+
+>FLUSH PRIVILEGES;
+
+
+//test_user:
+>USE testresult_bricsys;
+
+>INSERT testnames VALUES (1, "test1.txt"), (2, "test2.txt"), (3, "test3.txt"), (4, "test4.txt");
+
+>ALTER TABLE testresults ALTER COLUMN testid SET DEFAULT 1;
+
+
+//root:
+>SET GLOBAL local_infile=1;
+
+
+//test_user:
+cmd mysql --local-infile=1 -h 192.168.1.39 -u test_user -p
+
+>USE testresult_bricsys;
+
+>LOAD DATA LOCAL INFILE "C:\\Users\\M\\Downloads\\Attachments_kristina.rogalskaya@hexagon.com_2021-07-29_17-30-04\\py\\test1.txt" INTO TABLE testresults FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\r\n' IGNORE 2 rows (buildid, target, name, status, duration, physmemory, virtmemory, @d_t, testnode) SET create_time = STR_TO_DATE(@d_t, "%a %b %d %Y %H:%i:%s") ;
+
+>ALTER TABLE testresults ALTER COLUMN testid SET DEFAULT 2;
+
+>LOAD DATA LOCAL INFILE "C:\\Users\\M\\Downloads\\Attachments_kristina.rogalskaya@hexagon.com_2021-07-29_17-30-04\\py\\test2.txt" INTO TABLE testresults FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\r\n' IGNORE 2 rows (buildid, target, name, status, duration, physmemory, virtmemory, @d_t, testnode) SET create_time = STR_TO_DATE(@d_t, "%a %b %d %Y %H:%i:%s");
+
+>ALTER TABLE testresults ALTER COLUMN testid SET DEFAULT 3;
+
+>LOAD DATA LOCAL INFILE "C:\\Users\\M\\Downloads\\Attachments_kristina.rogalskaya@hexagon.com_2021-07-29_17-30-04\\py\\test3.txt" INTO TABLE testresults FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\r\n' IGNORE 2 rows (buildid, target, name, status, duration, physmemory, virtmemory, @d_t, testnode) SET create_time = STR_TO_DATE(@d_t, "%a %b %d %Y %H:%i:%s");
+
+>ALTER TABLE testresults ALTER COLUMN testid SET DEFAULT 4;
+
+>LOAD DATA LOCAL INFILE "C:\\Users\\M\\Downloads\\Attachments_kristina.rogalskaya@hexagon.com_2021-07-29_17-30-04\\py\\test4.txt" INTO TABLE testresults FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\r\n' IGNORE 2 rows (buildid, target, name, status, duration, physmemory, virtmemory, @d_t, testnode) SET create_time = STR_TO_DATE(@d_t, "%a %b %d %Y %H:%i:%s");
+
+>ALTER TABLE testresults ALTER COLUMN testid DROP DEFAULT;
+
+
+
+

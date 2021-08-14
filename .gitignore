@@ -1,4 +1,10 @@
 Lib/*
 Scripts/*
+<<<<<<< HEAD
 params.py
 pyvenv.cfg
+=======
+config.py
+pyvenv.cfg
+__pycache__/*
+>>>>>>> statistic_analys

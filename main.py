@@ -72,7 +72,8 @@ def plot_clastered_data(df, cl):
         cmap=cmap,
         colorbar=False
     )
-    plt.plot()
+    plt.show()
+
 
 def search_points(df, cl, coef):
     buildid_points = []
@@ -185,10 +186,75 @@ def visualization(testid):
     plt.show()
 
 
-main()
-visualization(3)
+# main()
+# visualization(4)
+
+def main2():
+    db = mysql.connector.connect(
+        host=config.host,
+        user=config.user,
+        password=config.password,
+        database=config.database
+    )
+    cur = db.cursor()
+
+    cur.execute("SELECT buildid, duration FROM testresults WHERE testid=1 ORDER BY create_time;")
+    data = pd.DataFrame(cur.fetchall())
+    data.columns = cur.column_names
+    db.close()
+
+    normed_data = data.copy(deep=True)
+    normed_duration = pd.Series(normed_data["duration"] / normed_data["duration"].max())
+    normed_data["normed_duration"] =normed_duration
+
+    groups = [] # номера групп
+    groups.append(1) # первая точка принадлежит первой группе
+
+    limitSlowdownOrSpeedup = 5  # чувствительность в процентах
+    support = 10 # минимальное количество точек в групп, что бы не являться выбросом
+
+    # формирование групп
+    for current_index in range(1, len(normed_data)):
+        mean_group = pd.Series(normed_data.loc[groups.index(groups[current_index - 1]):len(groups) - 1 - groups[::-1].index(groups[current_index - 1]), "normed_duration"]).mean()
+        if (abs(normed_data["normed_duration"].iloc[current_index] - mean_group) < limitSlowdownOrSpeedup / 100):
+            groups.append(groups[current_index - 1])
+        else:
+            print("Среднее группы " + str(groups[current_index -1]) + " = " + str(mean_group))
+            groups.append(groups[current_index - 1] + 1)
+    print(groups)
+    plot_clastered_data(normed_data, groups)
 
 
+    # удаление выбросов(группы в которых меньше 10 элементов помечаем -1)
+    for value in set(groups):
+        if(groups.count(value) < support):
+            groups = [x if x != value else -1 for x in groups]
+
+    normed_data_without_outliers, groups_without_outliers = outlier_filter(normed_data, np.array(groups))
+    plot_clastered_data(normed_data_without_outliers, groups_without_outliers)
+
+    groups_without_outliers_in_groups =[]
+    # поиск выбросов внутри групп
+    for index in range(len(groups_without_outliers)):
+        mean_group = pd.Series(normed_data_without_outliers.loc[groups.index(groups[index]):len(groups) - 1 - groups[::-1].index(groups[index]), "normed_duration"]).mean()
+        var_group = pd.Series(normed_data_without_outliers.loc[groups.index(groups[index]):len(groups) - 1 - groups[::-1].index(groups[index]), "normed_duration"]).var()
+        sigma = var_group**(1/2)
+
+        if(abs(normed_data_without_outliers["normed_duration"].iloc[index] - mean_group) > 3*sigma):
+            groups_without_outliers_in_groups.append(-1)
+        else:
+            groups_without_outliers_in_groups.append(groups_without_outliers[index])
+
+    normed_data_without_outliers, groups_without_outliers = outlier_filter(normed_data_without_outliers, np.array(groups_without_outliers_in_groups))
+    plot_clastered_data(normed_data_without_outliers, groups_without_outliers)
+
+
+
+
+
+
+
+main2()
 
 
 

@@ -128,7 +128,7 @@ def main():
         password=config.password,
         database=config.database
     )
-    # create_result_table(connection)
+    create_result_table(connection)
     cursor = connection.cursor()
 
 
@@ -149,36 +149,37 @@ def main():
 
         # формирование групп
         groups = creating_groups(normed_data, limitSlowdownOrSpeedup)
-        plot_clastered_data(normed_data, groups)
-
 
         # удаление выбросов(группы в которых меньше 10 элементов помечаем -1)
         support = 10  # минимальное количество точек в групп, что бы не являться выбросом
         for value in set(groups):
             if(groups.count(value) < support):
                 groups = [x if x != value else -1 for x in groups]
-
         normed_data_without_outliers, groups_without_outliers = outlier_filter(normed_data, groups)
 
         # поиск выбросов внутри групп
         groups_without_outliers_in_groups = deleting_outliers_in_groups(normed_data_without_outliers, groups_without_outliers)
+
+        # удаление выбросов внутри групп
         finaly_normed_data, finaly_groups = outlier_filter(normed_data_without_outliers, groups_without_outliers_in_groups)
-        # print(finaly_groups)
+
+        # поиск точек изменения времени выполнения
         buildid_points ,duration_persents = find(finaly_normed_data, finaly_groups, limitSlowdownOrSpeedup)
-        print(buildid_points)
-        print(duration_persents)
+
+        # вывод графика исходных точек и вертикальных линий в местах изменения времени выполнения
         plt.vlines(buildid_points, 0, data["duration"].max(), color="r", linewidth=1, linestyle="--")
         plt.plot(data["buildid"], data["duration"])
         plt.show()
 
+        count = 0
+        while (count < len(buildid_points)):
+            cursor.execute("INSERT INTO points(testid, buildid, slowdownOrSpeedup) VALUES({t_id},{b_id},{value});".format(t_id=test_id, b_id=buildid_points[count], value=duration_persents[count]))
+            count += 1
+        connection.commit()
+
     connection.close()
 
-    # while (count < len(buildid_points)):
-    #     cur.execute("INSERT INTO points(testid, buildid, slowdownOrSpeedup) VALUES({t_id},{b_id},{value});".format(
-    #         t_id=test_number, b_id=buildid_points[count], value=duration_persents[count]))
-    #     count += 1
-    # db.commit()
-
+    
 main()
 
 

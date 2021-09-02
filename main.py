@@ -28,8 +28,6 @@ def plot_clastered_data(df, gr):
     plt.show()
 
 
-
-
 def visualization(testid):
     db = mysql.connector.connect(
         host=config.host,
@@ -122,11 +120,14 @@ def find(df, gr, limit):
     return buildid_points, duration_persents
 
 def main():
+    print("start main")
     connection = mysql.connector.connect(
         host=config.host,
         user=config.user,
         password=config.password,
-        database=config.database
+        database=config.database,
+        port=config.port,
+        connect_timeout=30
     )
     create_result_table(connection)
     cursor = connection.cursor()

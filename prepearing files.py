@@ -1,7 +1,7 @@
 import os
 
-path_in = "C:\\bricsys_test_task\\analys_graph\\venv\\origin_files"
-path_out = "C:\\bricsys_test_task\\analys_graph\\venv\\modified_files"
+path_in = "origin_files"
+path_out = "modified_files"
 
 files = os.listdir(path_in)
 

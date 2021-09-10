@@ -64,6 +64,30 @@ in the zone of the execution time change.
 
 Plot in `test1`, limitSlowdownOrSpeedup = 20:
 
-![image_test1_20](/pictures/test1_limit_20.png)   
+![image test 1 20](/pictures/test1_limit_20.png) 
 
+Plot in `test2`, limitSlowdownOrSpeedup = 30:
 
+![image test 2 30](/pictures/test2_limit_30.png) 
+
+In database, results are displayed in this form:
+
+```mysql
+mysql> SELECT * FROM points ORDER BY testid, buildid;
++---------+--------+-------------------+
+| buildid | testid | slowdownOrSpeedup |
++---------+--------+-------------------+
+|   78818 |      1 |             31.16 |
+|   83044 |      1 |             28.46 |
+|   78818 |      2 |             70.41 |
+|   60286 |      4 |             27.58 |
++---------+--------+-------------------+
+4 rows in set (0.09 sec)
+```
+
+## Additional information:
+
+MySQL Server is running in a debian virtual machine on my laptop.
+main.py connects to a rented VPS with a white ip. The server is running
+OpenVPN server. Requests for a non-standard port are forwarded to the 
+OpenVPN client running on debian.

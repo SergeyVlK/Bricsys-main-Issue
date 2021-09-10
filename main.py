@@ -35,7 +35,8 @@ def visualization(testid):
         host=config.host,
         user=config.user,
         password=config.password,
-        database=config.database
+        database=config.database,
+        port=config.port
     )
     cur = db.cursor()
     cur.execute("SELECT buildid, duration FROM testresults WHERE testid=" + str(testid) + " ORDER BY create_time;")
